@@ -6,7 +6,7 @@ let response;
 
 exports.lambdaHandler = async (event) => {
 
-    await processSomeData()
+    await processSomeData();
 
     try {
         response = {
@@ -20,7 +20,7 @@ exports.lambdaHandler = async (event) => {
         return err;
     }
 
-    return response
+    return response;
 }
 
 function processSomeData() {
