@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Timeout: 15
+
+Resources:
+  ApiForTesting:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: development
+
+  ProvisionedConcurrencyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: provisioned/
+      Handler: provisioned.lambdaHandler
+      Runtime: nodejs12.x
+      AutoPublishAlias: concurrencylive
+      ProvisionedConcurrencyConfig:
+        ProvisionedConcurrentExecutions: 50
+      Events:
+        TestApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiForTesting
+            Path: /provisioned
+            Method: get
+  NormalFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: normal/
+      Handler: normal.lambdaHandler
+      Runtime: nodejs12.x
+      Events:
+        TestApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiForTesting
+            Path: /normal
+            Method: get
+
+Outputs:
+  TestApiProvisioned:
+    Description: "API Gateway endpoint for provisioned concurrency"
+    Value: !Sub "https://${ApiForTesting}.execute-api.${AWS::Region}.amazonaws.com/development/provisioned/"
+  TestApiNormal:
+    Description: "API Gateway endpoint for normal concurrency"
+    Value: !Sub "https://${ApiForTesting}.execute-api.${AWS::Region}.amazonaws.com/development/normal/"
